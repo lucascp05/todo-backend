@@ -1,0 +1,38 @@
+// define qual cliente o Prisma vai gerar automaticamente
+// esse cliente é o que usamos no código para acessar o banco
+generator client {
+  provider = "prisma-client-js"
+}
+
+// define qual banco de dados será usado
+// provider = tipo do banco (postgresql)
+// url = pega o endereço do banco do arquivo .env (DATABASE_URL)
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model = representa uma tabela no banco de dados
+// essa tabela vai se chamar Task
+model Task {
+
+  // id da tarefa
+  // String = tipo texto
+  // @id = define como chave primária
+  // @default(uuid()) = gera automaticamente um id único
+  id          String   @id @default(uuid())
+
+  // título da tarefa (obrigatório)
+  title       String
+
+  // descrição da tarefa (opcional por causa do ?)
+  description String?
+
+  // status da tarefa
+  // por padrão começa como "todo"
+  status      String   @default("todo")
+
+  // data de criação da tarefa
+  // now() salva automaticamente a data atual
+  createdAt   DateTime @default(now())
+}
