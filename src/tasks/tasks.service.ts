@@ -1,56 +1,42 @@
-// permite usar a classe como serviço no NestJS
-import { Injectable } from '@nestjs/common';
-
-// DTO para criar tarefa
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Task } from './entities/task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
-
-// DTO para atualizar tarefa
 import { UpdateTaskDto } from './dto/update-task.dto';
-
-// serviço que conecta ao banco via Prisma
-import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TasksService {
 
-  // injeta o Prisma para acessar o banco
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Task)
+    private taskRepository: Repository<Task>,
+  ) {}
 
-  // cria uma nova tarefa no banco
   async create(createTaskDto: CreateTaskDto) {
-    return this.prisma.task.create({
-      data: {
-        title: createTaskDto.title,
-        description: createTaskDto.description,
-        status: "todo"
-      }
-    });
+    const task = this.taskRepository.create(createTaskDto);
+    return this.taskRepository.save(task);
   }
 
-  // busca todas as tarefas
   async findAll() {
-    return this.prisma.task.findMany();
+    return this.taskRepository.find();
   }
 
-  // busca uma tarefa pelo id
   async findOne(id: string) {
-    return this.prisma.task.findUnique({
-      where: { id },
-    });
+    const task = await this.taskRepository.findOne({ where: { id } });
+    if (!task) throw new NotFoundException('Tarefa não encontrada');
+    return task;
   }
 
-  // atualiza uma tarefa pelo id
   async update(id: string, updateTaskDto: UpdateTaskDto) {
-    return this.prisma.task.update({
-      where: { id },
-      data: updateTaskDto,
-    });
+    await this.findOne(id);
+    await this.taskRepository.update(id, updateTaskDto);
+    return this.findOne(id);
   }
 
-  // remove uma tarefa pelo id
   async remove(id: string) {
-    return this.prisma.task.delete({
-      where: { id },
-    });
+    await this.findOne(id);
+    await this.taskRepository.delete(id);
+    return { message: 'Tarefa removida com sucesso' };
   }
 }

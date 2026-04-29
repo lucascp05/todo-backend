@@ -1,9 +1,12 @@
-// define o formato dos dados para criar tarefa
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+
 export class CreateTaskDto {
 
-  // título da tarefa (obrigatório)
+  @IsNotEmpty({ message: 'O título é obrigatório' })
+  @IsString({ message: 'O título deve ser um texto' })
   title: string;
 
-  // descrição da tarefa
-  description: string;
+  @IsOptional()
+  @IsString({ message: 'A descrição deve ser um texto' })
+  description?: string;
 }

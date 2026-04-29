@@ -1,29 +1,25 @@
-// importa decorator de módulo do NestJS
 import { Module } from '@nestjs/common';
-
-// controller principal (não usamos muito aqui)
 import { AppController } from './app.controller';
-
-// service principal (não usamos muito aqui)
 import { AppService } from './app.service';
-
-// módulo das tasks (onde está nosso CRUD)
 import { TasksModule } from './tasks/tasks.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Task } from './tasks/entities/task.entity';
 
-// serviço do Prisma para acessar o banco
-import { PrismaService } from './prisma/prisma.service'
-
-// define o módulo principal da aplicação
 @Module({
-
-  // módulos que o app vai usar
-  imports: [TasksModule],
-
-  // controllers globais
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: '123456',
+      database: 'todo_db',
+      entities: [Task],
+      synchronize: true,
+    }),
+    TasksModule,
+  ],
   controllers: [AppController],
-
-  // serviços disponíveis na aplicação
-  providers: [AppService, PrismaService],
-
+  providers: [AppService],
 })
 export class AppModule {}
